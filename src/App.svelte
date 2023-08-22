@@ -1,10 +1,17 @@
-<script>
-	let src = 'https://th.bing.com/th/id/R.829f70b90b89ec1ec81c30b6af8bf347?rik=WxWLvkzfXaXf0Q&pid=ImgRaw&r=0';
-  let name = 'A man dancing'
-</script>
+<p>This is a paragraph.</p>
 
-<img {src} alt={name} />
+<style>
+	p {
+		color: goldenrod;
+		font-family: 'Comic Sans Ms', cursive;
+		font-size: 2em;
+	}
+</style>
 
 <!--
-  Assim como você pode usar chaves para controlar o texto, você pode usá-las para controlar atributos de elemento.
+  
+  Assim como no HTML, você pode adicionar uma tag ao seu componente.
+
+  É importante ressaltar que essas regras têm escopo para o componente. Você não alterará acidentalmente o estilo dos elementos em outro lugar do seu aplicativo, como veremos na próxima etapa
+
 -->
