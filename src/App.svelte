@@ -1,11 +1,10 @@
 <script>
-  let name = 'Svelte'
+	let src = 'https://th.bing.com/th/id/R.829f70b90b89ec1ec81c30b6af8bf347?rik=WxWLvkzfXaXf0Q&pid=ImgRaw&r=0';
+  let name = 'A man dancing'
 </script>
 
-<main>
-  <h1>Hello {name.toUpperCase()}!</h1>
-</main>
+<img {src} alt={name} />
 
-<style>
-  
-</style>
+<!--
+  Assim como você pode usar chaves para controlar o texto, você pode usá-las para controlar atributos de elemento.
+-->
