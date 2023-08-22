@@ -1,6 +1,13 @@
 <script>
 	let count = 0;
-  $: double = count * 2;
+  
+  $: console.log('this count is ${count}')
+  $: console.log('this will also be logged whenever count changes')
+
+  $: if(count >= 10) {
+		alert('count is dangeroulsly hight!');
+		count = 0
+	}
 
   function increment() {
     count += 1;
@@ -12,14 +19,9 @@
   {count === 1 ? 'time' : 'times'}
 </button>
 
-<p>{count} fouble is {double}</p>
-
 <!--
 
-  As declarações reativas do Svelte são uma maneira de atualizar automaticamente o conteúdo de uma página da web em resposta a alterações no 
-  estado do aplicativo.
-
-  O símbolo $: indica que esta é uma declaração reativa e que o valor de doubled deve ser atualizado automaticamente sempre que o valor de count 
-  mudar2. Isso é muito útil quando você tem valores que dependem de outros valores e precisam ser atualizados automaticamente quando esses outros valores mudam. 
+ Não estamos limitados a declarar valores reativos — também podemos executar instruções arbitrárias reativamente.
+ Assim também como colocar o $: na frente de blocos.
 
 -->
