@@ -1,13 +1,12 @@
 <script>
-	let string = 'this string contains some <strong>HTML!!!</strong>';
+	let count = 0;
+
+  function increment() {
+    count += 1;
+  }
 </script>
 
-<p>{@html string}</p>
-
-<!--
-
-  Às vezes você precisa renderizar HTML diretamente em um componente.
-
-  No Svelte, você faz isso com a tag especial: {@html ...}
-  
--->
+<button on:click={increment}>
+  Clicked {count}
+  {count === 1 ? 'time' : 'times'}
+</button>
