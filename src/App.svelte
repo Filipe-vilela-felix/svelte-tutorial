@@ -1,4 +1,9 @@
+<script>
+  import Nested from "./Nested.svelte";
+</script>
+
 <p>This is a paragraph.</p>
+<Nested />
 
 <style>
 	p {
@@ -9,9 +14,9 @@
 </style>
 
 <!--
-  
-  Assim como no HTML, você pode adicionar uma tag ao seu componente.
 
-  É importante ressaltar que essas regras têm escopo para o componente. Você não alterará acidentalmente o estilo dos elementos em outro lugar do seu aplicativo, como veremos na próxima etapa
+  Podemos importar componentes de outros arquivos e incluí-los em nossa marcação.
+
+  Obs: Os nomes dos componentes são sempre em maiúsculas, para distingui-los dos elementos HTML.
 
 -->
