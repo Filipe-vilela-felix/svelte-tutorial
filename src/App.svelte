@@ -3,14 +3,12 @@
 </script>
 
 <Nested answer={42} />
+<Nested />
 
 <!--
 
-  Em qualquer aplicativo real, você precisará passar dados de um componente para seus filhos. 
-  Para isso, precisamos declarar propriedades, geralmente abreviadas para "adereços".
+  Podemos facilmente especificar valores padrão para adereços em: Nested.svelte
 
-  O componente Nested.svelte exporta uma propriedade chamada answer e exibe seu valor em um elemento <p>. 
-  O componente App.svelte, importa o primeiro componente como Nested e o usa em seu próprio modelo, 
-  passando o valor 42 para a propriedade answer do componente Nested.
+  Se agora adicionarmos um segundo componente sem um suporte, ele voltará ao padrão: answer (linha 6)
 
 -->
