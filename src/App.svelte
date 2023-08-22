@@ -1,22 +1,13 @@
 <script>
-  import Nested from "./Nested.svelte";
+	let string = 'this string contains some <strong>HTML!!!</strong>';
 </script>
 
-<p>This is a paragraph.</p>
-<Nested />
-
-<style>
-	p {
-		color: goldenrod;
-		font-family: 'Comic Sans Ms', cursive;
-		font-size: 2em;
-	}
-</style>
+<p>{@html string}</p>
 
 <!--
 
-  Podemos importar componentes de outros arquivos e incluí-los em nossa marcação.
+  Às vezes você precisa renderizar HTML diretamente em um componente.
 
-  Obs: Os nomes dos componentes são sempre em maiúsculas, para distingui-los dos elementos HTML.
-
+  No Svelte, você faz isso com a tag especial: {@html ...}
+  
 -->
