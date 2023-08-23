@@ -1,26 +1,22 @@
 <script>
-  import PackageInfo from "./PackageInfo.svelte";
+  let count = 0;
 
-  const pkg = {
-    name: 'svelte',
-    speed: 'blazing',
-    version: '4',
-    website: 'https://svelte.dev'
+  function increment() {
+    count += 1;
   }
 </script>
 
-<PackageInfo 
-  name={pkg.name},
-  speed={pkg.speed},
-  website={pkg.website},
-  version={pkg.version}
-/>
+<button on:click={increment}>
+  Clicked {count}
+  {count === 1 ? 'time' : 'times'}
+</button>
+
+{#if count > 10}
+  <p>{count} is greater than 10</p>
+{/if}
 
 <!--
 
-  OU
-  <PackageInfo {...pkg} /> (linha 13 a 16)
-
-  Nesse caso, você usa a sintaxe de propagação de propriedades (spread props), é mais concisa e pode ser útil quando você tem muitas propriedades para passar.
+  Para renderizar condicionalmente alguma marcação, nós a envolvemos em um bloco. (linha 14 a 16)
 
 -->
