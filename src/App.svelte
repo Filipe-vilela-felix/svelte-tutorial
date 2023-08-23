@@ -13,12 +13,14 @@
 
 {#if count > 10}
   <p>{count} is greater than 10</p>
-  {:else}
+{:else if count > 5}
+	<p>{count} is between 5 and 10</p>
+{:else}
   <p>{count} is between 0 e 10</p>
 {/if}
 
 <!--
 
-  Para renderizar condicionalmente alguma marcação, nós a envolvemos em um bloco. (linha 14 a 16)
+  
 
 -->
