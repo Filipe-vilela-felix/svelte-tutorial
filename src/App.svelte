@@ -1,14 +1,26 @@
 <script>
-  import Nested from "./Nested.svelte";
+  import PackageInfo from "./PackageInfo.svelte";
+
+  const pkg = {
+    name: 'svelte',
+    speed: 'blazing',
+    version: '4',
+    website: 'https://svelte.dev'
+  }
 </script>
 
-<Nested answer={42} />
-<Nested />
+<PackageInfo 
+  name={pkg.name},
+  speed={pkg.speed},
+  website={pkg.website},
+  version={pkg.version}
+/>
 
 <!--
 
-  Podemos facilmente especificar valores padrão para adereços em: Nested.svelte
+  OU
+  <PackageInfo {...pkg} /> (linha 13 a 16)
 
-  Se agora adicionarmos um segundo componente sem um suporte, ele voltará ao padrão: answer (linha 6)
+  Nesse caso, você usa a sintaxe de propagação de propriedades (spread props), é mais concisa e pode ser útil quando você tem muitas propriedades para passar.
 
 -->
