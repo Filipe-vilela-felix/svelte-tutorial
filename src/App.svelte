@@ -1,30 +1,34 @@
 <script>
-	import Thing from './Thing.svelte';
+	import { getRandomNumber } from './utils.js';
 
-	let things = [
-		{ id: 1, name: 'apple' },
-		{ id: 2, name: 'banana' },
-		{ id: 3, name: 'carrot' },
-		{ id: 4, name: 'doughnut' },
-		{ id: 5, name: 'egg' }
-	];
+	let promise = getRandomNumber();
 
 	function handleClick() {
-		things = things.slice(1);
+		promise = getRandomNumber();
 	}
 </script>
 
 <button on:click={handleClick}>
-	Remove first thing
+	generate random number
 </button>
 
-{#each things as thing (thing.id)}
-	<Thing name={thing.name} />
-{/each}
+{#await promise}
+  <p>...waiting</p>
+{:then number}
+  <p>The number is {number}</p>
+{:catch error}
+  <p style="color: red">{error.message}</p>
+{/await}
 
 <!--
 
-O objetivo desse código é fazer com que ao cliclar no botão, ele remover o primeiro componente e o nó DOM e deixar os outros não afetados. 
-E para que isso aconteça, expecificamos um indentificador exlcusivo (ou "chave") para o bloco #each, "thing. id" (linha 21). 
+  A maioria dos aplicativos Web precisa lidar com dados assíncronos em algum momento. 
+  Svelte facilita a espera pelo valor de Promessas diretamente na sua marcação. (linhas 15 a 21)
+
+  Se você sabe que sua promessa não pode ser rejeitada, você pode omitir o bloqueio. 
+  Você também pode omitir o primeiro bloco se não quiser mostrar nada até que a promessa seja resolvida:
+    {#await promise then number}
+        <p>The number is {number}</p>
+    {/await}
 
 -->
