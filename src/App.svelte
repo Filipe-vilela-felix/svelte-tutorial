@@ -1,41 +1,27 @@
 <script>
-  import Inner from './Inner.svelte'
+  import Outer from './Outer.svelte'
 
   function handleMessage(event) {
     alert(event.detail.text)
   }
 </script>
 
-<Inner on:message={handleMessage} />
+<Outer on:message={handleMessage}  />
 
 <!--
 
-  Os componentes também podem despachar eventos.Para fazer isso, eles devem criar um dispatcher de eventos. (linhas 2 e 4 em Inner.svelte);
+  Os eventos de componente em Svelte são uma maneira de os componentes se comunicarem entre si. 
+  Quando um componente emite um evento, ele pode ser ouvido por seu componente pai, que pode reagir a ele de alguma maneira. 
+  No entanto, ao contrário dos eventos DOM, os eventos de componente não borbulham automaticamente até a árvore de componentes. 
+  Isso significa que se você tiver um componente profundamente aninhado que emita um evento, apenas seu componente pai imediato poderá ouvi-lo.
 
-  Obs: createEventDispatcher deve ser chamado quando o componente é instanciado pela primeira vez —
-   você não pode fazer isso mais tarde, por exemplo, dentro de um retorno de chamada. Isso vincula à instância do componente.
+  Se você quiser que um componente mais acima na árvore de componentes ouça o evento, 
+  os componentes intermediários devem encaminhar o evento manualmente. 
+  Isso pode ser feito criando um manipulador de eventos no componente intermediário que ouça o evento do componente filho e 
+  emita um novo evento com o mesmo nome e detalhes.
 
   Contextualizando o código:
-    1. Em Inner.svelte, a função createEventDispatcher é importada do pacote svelte.
-
-    2. A função createEventDispatcher é chamada para criar uma instância de um despachante de eventos, que é armazenada na variável dispatch.
-
-    3. A função sayHello é definida. Quando chamada, ela usa o despachante de eventos para emitir um evento personalizado chamado message, 
-        com um objeto contendo a propriedade text com o valor 'Hello!'.
-
-    4. Um elemento button é renderizado com um manipulador de eventos on:click que chama a função sayHello quando clicado.
-
-    5. Em App.svelte, o componente Inner é importado de ./Inner.svelte.
-
-    6. A função handleMessage é definida. Quando chamada, ela exibe um alerta com o valor da propriedade text do objeto passado com o evento.
-
-    7. Uma instância do componente Inner é renderizada com um manipulador de eventos on:message, 
-        que chama a função handleMessage quando o evento personalizado message é emitido pelo componente.
-
-    8. Quando o usuário clica no botão em Inner.svelte, a função sayHello é chamada, que por sua vez emite o evento personalizado message.
-
-    9. Como o componente Inner em App.svelte tem um manipulador de eventos para o evento message, 
-        a função handleMessage é chamada quando o evento é emitido.
-        
-    10. A função handleMessage exibe um alerta com o texto 'Hello!'.
+    Neste exemplo, temos três componentes: Inner, Middle e Outer. O componente Inner emite um evento message quando seu botão é clicado. 
+    O componente Middle ouve esse evento e o encaminha emitindo um novo evento message com os mesmos detalhes. 
+    Finalmente, o componente Outer ouve o evento message do componente Middle e exibe um alerta com o texto do evento.
 -->
