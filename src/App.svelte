@@ -1,13 +1,12 @@
 <script>
 	let m = { x: 0, y: 0 };
-
-	function handleMove(event) {
-		m.x = event.clientX;
-		m.y = event.clientY;
-	}
 </script>
 
-<div on:pointermove={handleMove}>
+<div
+	on:pointermove={(e) => {
+		m = { x: e.clientX, y: e.clientY };
+	}}
+>
 	The pointer is at {m.x} x {m.y}
 </div>
 
@@ -24,13 +23,10 @@
 
 <!--
 
-  A maioria dos aplicativos Web precisa lidar com dados assíncronos em algum momento. 
-  Svelte facilita a espera pelo valor de Promessas diretamente na sua marcação. (linhas 15 a 21)
+  Note que também é possível declarar manipuladores de eventos embutidos. (linha 6 e 7)
 
-  Se você sabe que sua promessa não pode ser rejeitada, você pode omitir o bloqueio. 
-  Você também pode omitir o primeiro bloco se não quiser mostrar nada até que a promessa seja resolvida:
-    {#await promise then number}
-        <p>The number is {number}</p>
-    {/await}
+  Em algumas estruturas, você pode ver recomendações para evitar manipuladores de eventos embutidos por motivos de desempenho, 
+  especialmente loops internos. Esse conselho não se aplica ao Svelte — o compilador sempre fará a coisa certa, 
+  seja qual for a forma que você escolher.
 
 -->
