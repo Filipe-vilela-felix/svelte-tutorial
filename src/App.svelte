@@ -1,41 +1,41 @@
-<button on:click|once={() => alert('clicked')}>
-  Click me
-</button>
+<script>
+  import Inner from './Inner.svelte'
+
+  function handleMessage(event) {
+    alert(event.detail.text)
+  }
+</script>
+
+<Inner on:message={handleMessage} />
 
 <!--
 
-  Os manipuladores de eventos DOM podem ter modificadores que alteram seu comportamento.
+  Os componentes também podem despachar eventos.Para fazer isso, eles devem criar um dispatcher de eventos. (linhas 2 e 4 em Inner.svelte);
 
-  A lista completa de manipuladores:
-    once — remova o manipulador após a primeira vez que ele for executado. (linha 1 a 3);
-    preventDefault — chama antes de executar o manipulador. Útil para o manuseio de formulários do lado do cliente.
-      Ex: <form on:submit|preventDefault={submitForm}>
-            ...
-          </form>
+  Obs: createEventDispatcher deve ser chamado quando o componente é instanciado pela primeira vez —
+   você não pode fazer isso mais tarde, por exemplo, dentro de um retorno de chamada. Isso vincula à instância do componente.
 
-    stopPropagation — chamadas, impedindo que o evento atinja o próximo elemento.
-      Ex: <div on:click={divClick}>
-            <button on:click|stopPropagation={buttonClick}>Clique em mim</button>
-          </div>
+  Contextualizando o código:
+    1. Em Inner.svelte, a função createEventDispatcher é importada do pacote svelte.
 
-    passive — melhora o desempenho de rolagem em eventos de toque/roda (o Svelte irá adicioná-lo automaticamente onde for seguro fazê-lo).
-      Ex: <div on:wheel|passive={handleWheel}>Rode a roda do mouse aqui</div>
+    2. A função createEventDispatcher é chamada para criar uma instância de um despachante de eventos, que é armazenada na variável dispatch.
 
-    nonpassive — definir explicitamente passive: false.
-      Ex: <div on:wheel|nonpassive={handleWheel}>Rode a roda do mouse aqui</div>
+    3. A função sayHello é definida. Quando chamada, ela usa o despachante de eventos para emitir um evento personalizado chamado message, 
+        com um objeto contendo a propriedade text com o valor 'Hello!'.
 
-    capture — aciona o manipulador durante o capturar fase em vez do Borbulhando fase.
-      Ex: <div on:click|capture={handleClick}>Clique aqui</div>
+    4. Um elemento button é renderizado com um manipulador de eventos on:click que chama a função sayHello quando clicado.
 
-    self — somente acionar o manipulador se event.target for o próprio elemento.
-      Ex: <div on:click|self={handleClick}>
-            Clique aqui, mas não nos elementos filhos
-            <button>Clique aqui não acionará o manipulador</button>
-          </div>
+    5. Em App.svelte, o componente Inner é importado de ./Inner.svelte.
 
-    trusted — somente acionar o manipulador se for , o que significa que o evento foi acionado por uma ação do usuário e não porque algum JavaScript chamou event.isTrustedtrueelement.dispatchEvent(...)
-      Ex: <button on:click|trusted={handleClick}>Clique aqui</button>
+    6. A função handleMessage é definida. Quando chamada, ela exibe um alerta com o valor da propriedade text do objeto passado com o evento.
 
-  Obs: Você pode encadear modificadores juntos, por exemplo, .on:click|once|capture={...}
+    7. Uma instância do componente Inner é renderizada com um manipulador de eventos on:message, 
+        que chama a função handleMessage quando o evento personalizado message é emitido pelo componente.
 
-  -->
+    8. Quando o usuário clica no botão em Inner.svelte, a função sayHello é chamada, que por sua vez emite o evento personalizado message.
+
+    9. Como o componente Inner em App.svelte tem um manipulador de eventos para o evento message, 
+        a função handleMessage é chamada quando o evento é emitido.
+        
+    10. A função handleMessage exibe um alerta com o texto 'Hello!'.
+-->
