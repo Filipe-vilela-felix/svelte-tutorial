@@ -1,17 +1,30 @@
 <script>
-  let name = 'world';
+  let a = 1;
+  let b = 2;
 </script>
 
-<input bind:value={name} />
+<label>
+  <input type="number" bind:value={a} min="0" max="10" />
+  <input type="range" bind:value={a} min="0" max="10" />
+</label>
 
-<h1>Hello {name}!</h1>
+<br>
+
+<label>
+  <input type="number" bind:value={b} min="0" max="10" />
+  <input type="range" bind:value={b} min="0" max="10" />
+</label>
+
+<br>
+
+{a} + {b} = {a + b} 
 
 <!--
 
-  Como regra geral, o fluxo de dados no Svelte é de cima para baixo — um componente pai pode definir props em um componente filho e 
-  um componente pode definir atributos em um elemento, mas não o contrário.
+  Claro! O DOM (Document Object Model) é uma representação em árvore da estrutura de uma página da web. 
+  No DOM, todos os valores são armazenados como strings, mesmo que sejam números. Isso pode ser um problema quando você está trabalhando com 
+  entradas numéricas, como campos de entrada do tipo “number” ou “range”, pois significa que você precisa lembrar de converter o valor da entrada 
+  para um número antes de usá-lo.
 
-  Às vezes é útil quebrar essa regra, utilizando a directiva: bind:value. (linha 5);
-  Note que usando essa propriedade, o valor do nome usado em <h1> é alteraldo após alteração do mesmo em <input/>.
-
+  Com bind:value, o Svelte cuida disso para você. (linhas 7, 8,  14 e 15);
 -->
