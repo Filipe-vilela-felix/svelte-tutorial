@@ -1,41 +1,76 @@
 <script>
-  let yes = false;
+  let questions = [
+    {
+      id: 1,
+      text: `Where did you go to school?`,
+    },
+    {
+      id: 2,
+      text: `What is your mother's name?`,
+    },
+    {
+      id: 3,
+      text: `What is another personal fact that an attacker could easily find with Google?`,
+    },
+  ];
+
+  let selected;
+
+  let answer = "";
+
+  function handleSubmit() {
+    alert(
+      `answered question ${selected.id} (${selected.text}) with "${answer}"`
+    );
+  }
 </script>
 
-<label>
-  <input type="checkbox" bind:checked={yes} />
-  Yes! Send me regular email span
-</label>
+<h2>Insecurity questions</h2>
 
-{#if yes}
-  <p>
-    Thank you. We will bombard your inbox and sell
-		your personal details.
-  </p>
-  {:else}
-  <p>
-    You must opt in to continue. If you're not
-		paying, you're the product.
-  </p>
-{/if}
+<form on:submit|preventDefault={handleSubmit}>
+  <select bind:value={selected} on:change={() => (answer = "")}>
+    {#each questions as question}
+      <option value={question}>
+        {question.text}
+      </option>
+    {/each}
+  </select>
 
-<button disabled={!yes}>Subscribe</button>
+  <input bind:value={answer} />
+
+  <button type="submit" disabled={!answer}>
+    Submit
+  </button>
+</form>
+
 
 <!--
 
-  As caixas de seleção são usadas para alternar entre estados. Em vez de vincular a input.value, vinculamos a input.checked. (linha 6);
+  Também podemos usar bind:value com o elemento <select>. (linha 31);
+
+  Observe que os <option> valores são objetos em vez de cadeias de caracteres. Obs: Svelte não se importa
+
+  Importante!
+    Como não definimos um valor inicial de selected, a associação o definirá como o valor padrão (o primeiro da lista) automaticamente. 
+    Tenha cuidado, porém, até que a vinculação seja inicializada, a seleção permanece indefinida, portanto, não podemos referenciar cegamente, 
+    por exemplo, selected.id no modelo. (linha 23);
 
   Contextualizando o código:
-    - A primeira parte do código define uma variável yes e atribui a ela o valor false. (linha 2);
+    - O script JavaScript define uma matriz de objetos chamada questions, onde cada objeto representa uma pergunta de segurança 
+      com um id e um texto. (linhas 2 a 15);
+    
+    - O script também define duas variáveis, selected e answer, que armazenam a pergunta selecionada e a resposta do usuário, respectivamente. (linhas 17 e 19);
 
-    - Em seguida, o código cria um elemento label que contém um elemento input do tipo checkbox. 
-      O estado da caixa de seleção é vinculado à variável yes usando a diretiva bind:checked. (linhas 5 a 8);
-        (Isso significa que, quando a caixa de seleção é marcada ou desmarcada pelo usuário, 
-        o valor da variável yes é atualizado para refletir o estado atual da caixa de seleção.)
+    - A função handleSubmit é definida, que é chamada quando o usuário envia o formulário. Ela exibe um alerta com a pergunta selecionada, 
+      seu texto e a resposta do usuário. (linhas 21 a 25);
     
-    - A próxima parte do código usa uma estrutura condicional {#if ...}{:else}{/if} 
-      para exibir uma mensagem diferente dependendo do valor da variável yes. (linhas 10 a 20);
+    - O formulário HTML contém um elemento select que permite ao usuário escolher uma das perguntas de segurança da matriz questions. 
+      Quando o usuário seleciona uma pergunta, a variável selected é atualizada e a variável answer é redefinida para uma string vazia. (linha 31);
     
-    - Por fim, o código cria um botão que é desativado quando a variável yes é falsa (ou seja, quando a caixa de seleção não está marcada). (linha 22);
+    - O formulário também contém um elemento de entrada que permite ao usuário digitar sua resposta. Quando o usuário digita algo, 
+      a variável answer é atualizada com o valor da entrada. (lina 39);
+    
+    - Por fim, o formulário contém um botão de envio que só pode ser clicado quando a variável answer não está vazia. 
+      Quando o usuário clica no botão, a função handleSubmit é chamada e o alerta é exibido. (linha 41 a 43);
 
 -->
