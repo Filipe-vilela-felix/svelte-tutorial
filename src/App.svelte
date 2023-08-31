@@ -1,76 +1,77 @@
 <script>
-  let questions = [
-    {
-      id: 1,
-      text: `Where did you go to school?`,
-    },
-    {
-      id: 2,
-      text: `What is your mother's name?`,
-    },
-    {
-      id: 3,
-      text: `What is another personal fact that an attacker could easily find with Google?`,
-    },
-  ];
+  let scoops = 1;
+  let flavours = [];
 
-  let selected;
-
-  let answer = "";
-
-  function handleSubmit() {
-    alert(
-      `answered question ${selected.id} (${selected.text}) with "${answer}"`
-    );
-  }
+  const formatter = new Intl.ListFormat('en', { style: 'long', type: 'conjunction' });
 </script>
 
-<h2>Insecurity questions</h2>
+<h2>Size</h2>
 
-<form on:submit|preventDefault={handleSubmit}>
-  <select bind:value={selected} on:change={() => (answer = "")}>
-    {#each questions as question}
-      <option value={question}>
-        {question.text}
-      </option>
-    {/each}
-  </select>
+{#each [1,2,3] as number}
+  <label>
+    <input 
+      type="radio" 
+      name="scoops"
+      value={number}
+      bind:group={scoops}
+    />
+    {number} {number === 1 ? 'scoop' : 'scoops'}
+    <br>
+  </label>
+{/each}
 
-  <input bind:value={answer} />
+<h2>Flavours</h2>
 
-  <button type="submit" disabled={!answer}>
-    Submit
-  </button>
-</form>
+{#each ['cookies and cream', 'mint choc chip', 'raspberry ripple'] as flavour}
+  <label>
+    <input 
+      type="checkbox"
+      name="flavours"
+      value={flavour}
+      bind:group={flavours}
+    />
+    {flavour}
+    <br>
+  </label>
+{/each}
 
+{#if flavours.length === 0} 
+  <p>Please select at least one flavour</p>
+{:else if flavours.length > scoops}
+  <p>Can't order more flavours than scoops!</p>
+{:else}
+  <p>
+    You ordered {scoops} {scoops === 1 ? 'scoop' : 'scoops'}
+    of {formatter.format(flavours)}
+  </p>
+{/if}
 
 <!--
 
-  Também podemos usar bind:value com o elemento <select>. (linha 31);
-
-  Observe que os <option> valores são objetos em vez de cadeias de caracteres. Obs: Svelte não se importa
-
-  Importante!
-    Como não definimos um valor inicial de selected, a associação o definirá como o valor padrão (o primeiro da lista) automaticamente. 
-    Tenha cuidado, porém, até que a vinculação seja inicializada, a seleção permanece indefinida, portanto, não podemos referenciar cegamente, 
-    por exemplo, selected.id no modelo. (linha 23);
-
   Contextualizando o código:
-    - O script JavaScript define uma matriz de objetos chamada questions, onde cada objeto representa uma pergunta de segurança 
-      com um id e um texto. (linhas 2 a 15);
-    
-    - O script também define duas variáveis, selected e answer, que armazenam a pergunta selecionada e a resposta do usuário, respectivamente. (linhas 17 e 19);
+    Este código permite ao usuário escolher o tamanho e os sabores de um sorvete.
 
-    - A função handleSubmit é definida, que é chamada quando o usuário envia o formulário. Ela exibe um alerta com a pergunta selecionada, 
-      seu texto e a resposta do usuário. (linhas 21 a 25);
+    - O código começa com a definição de três variáveis: scoops, flavors e formatter.
+      - A variável scoops é inicializada com o valor 1, representando o número de bolas de sorvete que o usuário deseja. 
+      - A variável flavours é inicializada como uma matriz vazia, representando os sabores escolhidos pelo usuário. 
+      - A variável formatter é inicializada como uma nova instância da classe Intl.ListFormat, que é usada para formatar uma lista de itens 
+        em uma string legível.
+
+    - Em seguida, o código apresenta duas seções: “Tamanho” e “Sabores”.
+      - Na seção “Tamanho”:
+        O código usa um loop {#each} para iterar sobre uma matriz de números [1, 2, 3].
+        Para cada número na matriz, o código cria um elemento <label> contendo um elemento <input> do tipo “radio” e um texto que exibe
+        o número de bolas de sorvete correspondente. O atributo value do elemento <input> é definido como o número atual da iteração.
+      - Na seção “Sabores”:
+        O código usa outro loop {#each} para iterar sobre uma matriz de strings representando os sabores disponíveis. 
+        Para cada sabor na matriz, o código cria um elemento <label> contendo um elemento <input> do tipo “checkbox” e um texto que exibe 
+          o sabor correspondente. O atributo value do elemento <input> é definido como o sabor atual da iteração.
     
-    - O formulário HTML contém um elemento select que permite ao usuário escolher uma das perguntas de segurança da matriz questions. 
-      Quando o usuário seleciona uma pergunta, a variável selected é atualizada e a variável answer é redefinida para uma string vazia. (linha 31);
-    
-    - O formulário também contém um elemento de entrada que permite ao usuário digitar sua resposta. Quando o usuário digita algo, 
-      a variável answer é atualizada com o valor da entrada. (lina 39);
-    
-    - Por fim, o formulário contém um botão de envio que só pode ser clicado quando a variável answer não está vazia. 
-      Quando o usuário clica no botão, a função handleSubmit é chamada e o alerta é exibido. (linha 41 a 43);
+    - Finalmente, o código usa uma estrutura condicional {#if} para verificar se a matriz flavours está vazia ou se seu comprimento é maior que o valor da variável scoops. 
+      Se a matriz estiver vazia, o código exibe uma mensagem pedindo ao usuário para selecionar pelo menos um sabor. 
+      Se o comprimento da matriz for maior que o valor da variável scoops, o código exibe uma mensagem informando ao usuário que ele não pode 
+      pedir mais sabores do que bolas de sorvete. 
+      Caso contrário, o código exibe uma mensagem informando ao usuário quantas bolas de sorvete ele pediu e quais sabores foram escolhidos, 
+      usando a variável formatter para formatar a lista de sabores em uma string legível.
 
 -->
