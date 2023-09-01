@@ -1,35 +1,51 @@
 <script>
-  let value = `Some words are *italic*, some are **bold**\n\n- lists\n- are\n- cool`;
+  import { onMount } from 'svelte';
+  import { paint } from './gradient';
 
-  function markdownToHtml(markdown) {
-        let html = markdown;
-        html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-        html = html.replace(/\*(.+?)\*/g, '<em>$1</em>');
-        html = html.replace(/\n/g, '<br>');
-        html = html.replace(/-\s(.+?)<br>/g, '<li>$1</li>');
-        return `<ul>${html}</ul>`;
-  }
+  onMount(() => {
+		const canvas = document.querySelector('canvas');
+		const context = canvas.getContext('2d');
+
+		let frame = requestAnimationFrame(function loop(t) {
+			frame = requestAnimationFrame(loop);
+			paint(context, t);
+		});
+
+    return() => {
+      cancelAnimationFrame(frame)
+    }
+	});
 </script>
 
-<div class="grid">
-  input
-  <textarea bind:value></textarea>
-
-  output
-  <div>{@html markdownToHtml(value)}</div>
-</div>
+<canvas 
+  width={32}
+  height={32}
+/>
 
 <style>
-  .grid {
-    display: grid;
-    grid-template-columns: 5em 1fr;
-		grid-template-rows: 1fr 1fr;
-		grid-gap: 1em;
+  canvas {
+    position: fixed;
+		left: 0;
+		top: 0;
+		width: 100%;
 		height: 100%;
+		background-color: #666;
+		mask: url(./svelte-logo-mask.svg) 50% 50% no-repeat;
+		mask-size: 60vmin;
+		-webkit-mask: url(./svelte-logo-mask.svg) 50% 50% no-repeat;
+		-webkit-mask-size: 60vmin;
   }
-
-  textarea {
-		flex: 1;
-		resize: none;
-	}
 </style>
+
+<!--
+
+  Cada componente tem um ciclo de vida que começa quando é criado e termina quando é destruído. 
+  Há um punhado de funções que permitem executar código em momentos-chave durante esse ciclo de vida. 
+  O que você usará com mais frequência é onMount, que é executado depois que o componente é renderizado pela primeira vez no DOM. (linhas 2 e 5);
+
+  Além do onMount, também temos a função de limpeza do mesmo. (linha 14 a 16);
+
+  Contextualizando o código:
+    Neste exercício, temos um <canvas> que gostaríamos de animar, usando a função paint em gradiente.js.
+
+-->
