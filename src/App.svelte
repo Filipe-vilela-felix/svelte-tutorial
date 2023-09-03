@@ -1,183 +1,86 @@
 <script>
-  import Eliza from 'elizabot';
-  import {
-    beforeUpdate,
-    afterUpdate
-  } from 'svelte';
+	import {tick} from 'svelte'
+	let text = `Select some text and hit the tab key to toggle uppercase`;
 
-  let div;
-  let autoscroll = false;
+	async function handleKeydown(event) {
+		if (event.key !== 'Tab') return;
 
-  beforeUpdate(() => {
-    if (div) {
-      const scrollableDistance = div.scrollHeight - div.offsetHeight;
-      autoscroll = div.scrollTop > scrollableDistance - 20;
-	  } 
-  })
+		event.preventDefault();
 
-  afterUpdate(() => {
-    if (autoscroll) {
-		  div.scrollTo(0, div.scrollHeight);
-	  }
-  })
+		await tick();
+		const { selectionStart, selectionEnd, value } = this;
+		const selection = value.slice(selectionStart, selectionEnd);
 
-  const eliza = new Eliza();
-  const pause = (ms) => new Promise((fulfil) => setTimeout(fulfil, ms));
+		const replacement = /[a-z]/.test(selection)
+			? selection.toUpperCase()
+			: selection.toLowerCase();
 
-  const typing = { author: 'eliza', text: '...' };
-  let comments = [];
+		text =
+			value.slice(0, selectionStart) +
+			replacement +
+			value.slice(selectionEnd);
 
-  async function handleKeydown(event) {
-		if (event.key === 'Enter' && event.target.value) {
-			const comment = {
-				author: 'user',
-				text: event.target.value
-			};
-
-			const reply = {
-				author: 'eliza',
-				text: eliza.transform(comment.text)
-			};
-
-			event.target.value = '';
-			comments = [...comments, comment];
-
-			await pause(200 * (1 + Math.random()));
-			comments = [...comments, typing];
-
-			await pause(500 * (1 + Math.random()));
-			comments = [...comments, reply].filter(comment => comment !== typing);
-		}
+		// this has no effect, because the DOM hasn't updated yet
+		this.selectionStart = selectionStart;
+		this.selectionEnd = selectionEnd;
 	}
 </script>
 
-<div class="container">
-	<div class="phone">
-		<div class="chat" bind:this={div}>
-			<header>
-				<h1>Eliza</h1>
-
-				<article class="eliza">
-					<span>{eliza.getInitial()}</span>
-				</article>
-			</header>
-
-			{#each comments as comment}
-				<article class={comment.author}>
-					<span>{comment.text}</span>
-				</article>
-			{/each}
-		</div>
-
-		<input on:keydown={handleKeydown} />
-	</div>
-</div>
+<textarea
+	value={text}
+	on:keydown={handleKeydown}
+/>
 
 <style>
-	.container {
-		display: grid;
-		place-items: center;
-		height: 100%;
-	}
-
-	.phone {
-		display: flex;
-		flex-direction: column;
+	textarea {
 		width: 100%;
 		height: 100%;
-	}
-
-	header {
-		display: flex;
-		flex-direction: column;
-		height: 100%;
-		padding: 4em 0 0 0;
-		box-sizing: border-box;
-	}
-
-	h1 {
-		flex: 1;
-		font-size: 1.4em;
-		text-align: center;
-	}
-
-	.chat {
-		height: 0;
-		flex: 1 1 auto;
-		padding: 0 1em;
-		overflow-y: auto;
-		scroll-behavior: smooth;
-	}
-
-	article {
-		margin: 0 0 0.5em 0;
-	}
-
-	.user {
-		text-align: right;
-	}
-
-	span {
-		padding: 0.5em 1em;
-		display: inline-block;
-	}
-
-	.eliza span {
-		background-color: var(--bg-1);
-		border-radius: 1em 1em 1em 0;
-		color: var(--fg-1);
-	}
-
-	.user span {
-		background-color: #0074d9;
-		color: white;
-		border-radius: 1em 1em 0 1em;
-		word-break: break-all;
-	}
-
-	input {
-		margin: 0.5em 1em 1em 1em;
-	}
-
-	@media (min-width: 400px) {
-		.phone {
-			background: var(--bg-2);
-			position: relative;
-			font-size: min(2.5vh, 1rem);
-			width: auto;
-			height: 36em;
-			aspect-ratio: 9 / 16;
-			border: 0.2em solid #222;
-			border-radius: 1em;
-			box-sizing: border-box;
-			filter: drop-shadow(1px 1px 0px #222) drop-shadow(2px 2px 0px #222) drop-shadow(3px 3px 0px #222)
-		}
-
-		.phone::after {
-			position: absolute;
-			content: '';
-			background: #222;
-			width: 60%;
-			height: 1em;
-			left: 20%;
-			top: 0;
-			border-radius: 0 0 0.5em 0.5em
-		}
-	}
-
-	@media (prefers-reduced-motion) {
-		.chat {
-			scroll-behavior: auto;
-		}
+		resize: none;
 	}
 </style>
 
+
 <!--
 
-  beforeUpdate: Esta função é chamada logo antes de o DOM ser atualizado. 
-    Você pode usá-la para programar algum trabalho que precisa acontecer imediatamente antes da atualização do DOM. (linha 11 a 16);
-  
-  afterUpdate: Esta função é chamada logo após o DOM ser atualizado. 
-    Você pode usá-la para executar algum código que precisa acontecer imediatamente após a atualização do DOM. (linha 18  22);
+  A função tick é diferente de outras funções de ciclo de vida, pois você pode chamá-la a qualquer momento, 
+  não apenas quando o componente é inicializado pela primeira vez. Ele retorna uma promessa que é resolvida assim que quaisquer alterações de 
+  estado pendentes forem aplicadas ao DOM (ou imediatamente, se não houver alterações de estado pendentes).
 
+  Quando você atualiza o estado do componente no Svelte, ele não atualiza o DOM imediatamente. 
+  Em vez disso, ele aguarda até a próxima microtarefa para ver se há outras alterações que precisam ser aplicadas, 
+  inclusive em outros componentes. Isso evita o trabalho desnecessário e permite que o navegador agrupe as coisas de forma mais eficaz.
+
+  Você pode ver esse comportamento neste exemplo. Selecione um intervalo de texto e pressione a tecla tab. Como o <textarea> valor muda, 
+  a seleção atual é limpa e o cursor pula, irritantemente, para o final. Podemos corrigir isso importando tick...
+
+  CONTEXTUALIZANDO O CÓDIGO:
+    Este código é um script Svelte que permite ao usuário alternar entre maiúsculas e minúsculas o texto selecionado em uma área de texto 
+    pressionando a tecla Tab:
+
+    - Uma variável text que contém o texto inicial que será exibido na área de texto. (linha 2);
+
+    - A função handleKeydown é definida para lidar com o evento keydown na área de texto. Ela recebe um objeto de evento como argumento. (linha 5);
+
+    - Dentro da função handleKeydown, a primeira coisa que fazemos é verificar se a tecla pressionada é a tecla Tab usando 
+      if (event.key !== 'Tab') return;. Se não for, retornamos imediatamente e não fazemos mais nada. (linha 6);
+
+    - Em seguida, usamos event.preventDefault(); para impedir que o comportamento padrão da tecla Tab (mudar o foco para o próximo elemento) ocorra. (linha 8);
+
+    - Usamos a desestruturação de objetos para extrair as propriedades selectionStart, selectionEnd e value do elemento de área de texto 
+      (referenciado por this). Essas propriedades nos dão a posição inicial e final do texto selecionado e o valor atual da área de texto, 
+      respectivamente. (linha 11);
+    
+    - Usamos o método slice para extrair o texto selecionado da área de texto usando const selection = value.slice(selectionStart, selectionEnd); (linha 12);
+
+    - Em seguida, usamos uma expressão regular para verificar se o texto selecionado contém algum caractere minúsculo usando 
+      /[a-z]/.test(selection). Se sim, convertemos todo o texto selecionado para maiúsculas usando selection.toUpperCase(). 
+      Caso contrário, convertemos todo o texto selecionado para minúsculas usando selection.toLowerCase(). 
+      Armazenamos o resultado em uma variável chamada replacement. (linha 14 a 16);
+
+    - Atualizamos o valor da variável text concatenando as partes do valor original da área de texto antes e depois da seleção com o texto de 
+      substituição usando text = value.slice(0, selectionStart) + replacement + value.slice(selectionEnd); (linha 18 a 21);
+
+    - Finalmente, tentamos restaurar a posição do cursor na área de texto usando 
+      this.selectionStart = selectionStart; e this.selectionEnd = selectionEnd;. 
+      No entanto, isso não tem efeito porque a atualização do DOM ainda não ocorreu. (linha 24 e 25);
 -->
