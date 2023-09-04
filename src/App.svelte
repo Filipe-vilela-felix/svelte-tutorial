@@ -1,17 +1,20 @@
 <script>
+//import { onDestroy } from 'svelte';
 	import { count } from './stores.js';
 	import Incrementer from './Incrementer.svelte';
 	import Decrementer from './Decrementer.svelte';
 	import Resetter from './Resetter.svelte';
 
-	let count_value;
+//let count_value;
 
-	count.subscribe((value) => {
-		count_value = value;
-	});
+//const unsubscribe = count.subscribe((value) => {
+// count_value = value;
+//});
+
+//onDestroy(unsubscribe);
 </script>
 
-<h1>The count is {count_value}</h1>
+<h1>The count is {$count}</h1>
 
 <Incrementer />
 <Decrementer />
@@ -19,37 +22,22 @@
 
 <!--
 
-  Nem todo o estado do aplicativo pertence à hierarquia de componentes do aplicativo. 
-  Às vezes, você terá valores que precisam ser acessados por vários componentes não relacionados ou por um módulo JavaScript normal.
+  O aplicativo no exemplo anterior funciona, mas há um bug sutil — a loja é assinada, mas nunca cancelada. 
+  Se o componente foi instanciado e destruído muitas vezes, isso resultaria em um vazamento de memória.
 
-  Na Svelte, fazemos isso com lojas. Uma loja é simplesmente um objeto com um método que permite que as partes interessadas sejam notificadas 
-  sempre que o valor da loja mudar.
+  Chamar um método subscribe retorna uma função de cancelamento de assinatura. (linha 10)
 
-  CONTEXTUALIZANDO O CÓDIGO:
-    Este código é um aplicativo Svelte que permite ao usuário incrementar, decrementar e redefinir um contador.
+  Agora você declarou unsubcribe, mas ainda precisa ser chamado, por exemplo, por meio do gancho do ciclo de vida onDestroy. (linha 2)
 
-    - App.svelte: Este é o componente principal do aplicativo. Ele importa a loja count de stores.js e os componentes Incrementer, Decrementer e 
-      Resetter. Ele também define uma variável local count_value e se inscreve na loja count para atualizar o valor de 
-      count_value sempre que o valor da loja mudar. O modelo (template) do componente exibe o valor atual de count_value e renderiza os 
-      componentes Incrementer, Decrementer e Resetter.
+  No entanto, ele começa a ficar um pouco clichê, especialmente se seu componente assinar várias lojas. 
+  Em vez disso, o Svelte tem um truque na manga — você pode fazer referência a um valor de loja prefixando o nome da loja com $: (linha 17);
 
-    - Incrementer.svelte: Este é um componente que permite ao usuário incrementar o contador. 
-      Ele importa a loja count de stores.js e define uma função increment que será usada para incrementar o valor da loja. 
-      No entanto, a função está vazia no momento e precisa ser preenchida com o código para incrementar o valor da loja. 
-      O modelo do componente renderiza um botão que chama a função increment quando clicado.
+  Obs: A assinatura automática só funciona com variáveis de armazenamento declaradas (ou importadas) no escopo de nível superior de um componente.
 
-    - Decrementer.svelte: Este é um componente que permite ao usuário decrementar o contador. 
-      Ele importa a loja count de stores.js e define uma função decrement que será usada para decrementar o valor da loja. 
-      No entanto, a função está vazia no momento e precisa ser preenchida com o código para decrementar o valor da loja. 
-      O modelo do componente renderiza um botão que chama a função decrement quando clicado.
+  Obs: Você também não está limitado a usar $count dentro da marcação — você também pode usá-la em qualquer lugar <script> , 
+        como em manipuladores de eventos ou declarações reativas.
 
-    - Resetter.svelte: Este é um componente que permite ao usuário redefinir o contador. 
-      Ele importa a loja count de stores.js e define uma função reset que será usada para redefinir o valor da loja.
-      No entanto, a função está vazia no momento e precisa ser preenchida com o código para redefinir o valor da loja. 
-      O modelo do componente renderiza um botão que chama a função reset quando clicado.
-    
-    - stores.js: Este arquivo define e exporta a loja count. 
-      Ele importa a função writable do pacote ‘svelte/store’ e usa-a para criar uma nova loja com valor inicial 0. 
-      A loja é exportada para que possa ser usada por outros componentes.
+  Obs: Presume-se que qualquer nome que comece com $ se refira a um valor de loja. 
+        É efetivamente um caractere reservado — o Svelte impedirá que você declare suas próprias variáveis com um prefixo $.
 
 -->
