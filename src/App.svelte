@@ -1,89 +1,22 @@
 <script>
-	// import { writable } from 'svelte/store';
-
-	// let coords = writable({ x: 50, y: 50 });
-	// let size = writable(10);
-  import { spring } from 'svelte/motion';
-
-  let coords = spring({ x: 50, y: 50 }, {
-		stiffness: 0.1,
-		damping: 0.25
-	});
-  let size = spring(10);
+  import { fade } from 'svelte/transition';
+  let visible = true;
 </script>
 
-<svg
-	on:mousemove={(e) => {
-		coords.set({ x: e.clientX, y: e.clientY });
-	}}
-	on:mousedown={() => size.set(30)}
-	on:mouseup={() => size.set(10)}
->
-	<circle
-		cx={$coords.x}
-		cy={$coords.y}
-		r={$size}
-	/>
-</svg>
+<label>
+  <input type="checkbox" bind:checked={visible} />
+  visible
+</label>
 
-<div class="controls">
-	<label>
-		<h3>stiffness ({coords.stiffness})</h3>
-		<input
-			bind:value={coords.stiffness}
-			type="range"
-			min="0.01"
-			max="1"
-			step="0.01"
-		/>
-	</label>
-
-	<label>
-		<h3>damping ({coords.damping})</h3>
-		<input
-			bind:value={coords.damping}
-			type="range"
-			min="0.01"
-			max="1"
-			step="0.01"
-		/>
-	</label>
-</div>
-
-<style>
-	svg {
-		position: absolute;
-		width: 100%;
-		height: 100%;
-		left: 0;
-		top: 0;
-	}
-
-	circle {
-		fill: #ff3e00;
-	}
-
-	.controls {
-		position: absolute;
-		top: 1em;
-		right: 1em;
-		width: 200px;
-		user-select: none;
-	}
-
-	.controls input {
-		width: 100%;
-	}
-</style>
+{#if visible}
+  <p transition:fade>Fade in and out</p>
+{/if}
 
 <!--
 
-  A função spring (mola) é uma alternativa à interpolação que geralmente funciona melhor para valores que estão mudando com frequência.
+  Podemos tornar as interfaces de usuário mais atraentes fazendo a transição graciosa de elementos para dentro e para fora do DOM. (linhas 2 e 12);
 
-  Neste exemplo, temos duas lojas — uma representando as coordenadas do círculo e outra representando seu tamanho. 
-  Ao invés de writable (linhas 2 a 5), vamos convertê-los em springs (linhas 6 a 9).
-
-  Ambas as molas têm valores padrão de stiffness (rigidez) e damping (armotecimento), que controlam a mola, bem… a elasticidade. 
-  Podemos especificar nossos próprios valores iniciais. (linhas 9 e 10);
+  CONTEXTUALIZANDO O CÓDIGO:
+    Este código cria uma checkbox que o usuário pode marcar e desmarcar para mostrar e ocultar um parágrafo de texto com uma transição suave.
 
 -->
