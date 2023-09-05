@@ -1,107 +1,65 @@
 <script>
-	import { fade } from 'svelte/transition';
-	import { elasticOut } from 'svelte/easing';
+	let visible = false;
 
-	let visible = true;
+	function typewriter(node, { speed = 1 }) {
+		const valid = node.childNodes.length === 1 && node.childNodes[0].nodeType === Node.TEXT_NODE;
 
-	function spin(node, { duration }) {
+		if (!valid) {
+			throw new Error(`This transition only works on elements with a single text node child`);
+		}
+
+		const text = node.textContent;
+		const duration = text.length / (speed * 0.01);
+
 		return {
 			duration,
-			css: (t) => {
-				const eased = elasticOut(t);
-
-				return `
-					transform: scale(${eased}) rotate(${eased * 1080}deg);
-					color: hsl(
-						${Math.trunc(t * 360)},
-						${Math.min(100, 1000 * (1 - t))}%,
-						${Math.min(50, 500 * (1 - t))}%
-					);`;
+			tick: (t) => {
+				const i = Math.trunc(text.length * t);
+				node.textContent = text.slice(0, i);
 			}
 		};
 	}
 </script>
 
-<label class="label">
+<label>
 	<input type="checkbox" bind:checked={visible} />
 	visible
 </label>
 
 {#if visible}
-	<div
-		class="centered"
-		in:spin={{ duration: 8000 }}
-		out:fade
-	>
-		<span>transitions!</span>
-	</div>
+	<p transition:typewriter>
+		The quick brown fox jumps over the lazy dog
+	</p>
 {/if}
-
-<style>
-  .label {
-    position: absolute;
-    left: 47%;
-    top: 40%;
-  }
-
-	.centered {
-		position: absolute;
-		left: 50%;
-		top: 50%;
-		transform: translate(-50%, -50%);
-	}
-
-	span {
-		position: absolute;
-		transform: translate(-50%, -50%);
-		font-size: 4em;
-	}
-</style>
 
 <!--
 
-  O módulo svelte/transition tem um punhado de transições integradas, contudo, é criar o seu próprio.
-
-  A função usa dois argumentos — o nó ao qual a transição é aplicada e quaisquer parâmetros que foram passados — 
-  e retorna um objeto de transição que pode ter as seguintes propriedades:
-    - delay: milissegundos antes do início da transição.
-    - duration: duração da transição em milissegundos.
-    - easing: Uma função p => t de flexibilização (presente no commit "tweens").
-    - css: Uma função (t, u) => css,onde u === 1 - t
-    - tick: Uma função (t, u) => {...}  que tem algum efeito no node.
+  Embora você geralmente deva usar CSS para transições tanto quanto possível, há alguns efeitos que não podem ser alcançados sem JavaScript, 
+    como um efeito de máquina de escrever:
 
   CONTEXTUALIZANDO O CÓDIGO:
-    Este código é um exemplo de uma função de transição personalizada em Svelte.
-
-    1. import { elasticOut } from 'svelte/easing';: (linha 3);
-        - Esta linha importa a função elasticOut do módulo svelte/easing. A função elasticOut é uma função de atenuação (easing) que 
-            pode ser usada para criar animações suaves e elásticas.
-
-    2. function spin(node, { duration }) { ... }: (linha 7);
-        - Esta é a definição da função spin, que é uma função de transição personalizada. As funções de transição são usadas em Svelte para 
-            animar elementos da interface do usuário quando eles entram ou saem do DOM.
-        - A função spin recebe dois argumentos: node e um objeto com a propriedade duration. O argumento node é o elemento DOM que 
-            está sendo animado. O argumento duration é a duração da animação em milissegundos.
+    1. <script> let visible = false; function typewriter(node, { speed = 1 }) { ... } </script>:
+        - Este bloco de script define uma variável visible e uma função typewriter.
+        - A variável visible é inicializada como false. Esta variável será usada para controlar se o parágrafo de texto é visível ou não.
+        - A função typewriter é uma transição personalizada que pode ser aplicada a elementos da interface do usuário. Ela recebe dois argumentos: 
+            node e um objeto com a propriedade speed. O argumento node é o elemento DOM que está sendo animado. 
+            O argumento speed é a velocidade da animação.
     
-    3. return { duration, css: (t) => { ... } };: (linhas 8,9,10);
-        - A função spin retorna um objeto com duas propriedades: duration e css.
-        - A propriedade duration é definida como o valor do argumento duration passado para a função. Isso especifica a duração da animação.
-        - A propriedade css é uma função que recebe um único argumento t. O argumento t é um valor entre 0 e 1 que 
-            representa o progresso da animação. Quando a animação começa, o valor de t é 0. Quando a animação termina, o valor de t é 1.
-        
-    4. const eased = elasticOut(t);: (linha 11);
-        - Dentro da função css, a primeira linha calcula o valor de uma variável local chamada eased. O valor de eased é calculado chamando 
-            a função elasticOut com o argumento t. Isso aplica a atenuação elástica ao progresso da animação, criando um efeito suave e elástico.
+    2. <label><input type="checkbox" bind:checked={visible} /> visible </label>:
+        - Este é um elemento de entrada do tipo checkbox. A diretiva bind:checked é usada para criar uma ligação bidirecional entre a propriedade 
+            checked do elemento de entrada e a variável visible. Isso significa que quando o estado do checkbox muda 
+            (ou seja, quando é marcado ou desmarcado), o valor da variável visible também muda.
+      
+    3. {#if visible} <p transition:typewriter> The quick brown fox jumps over the lazy dog </p> {/if}:
+        - Este é um bloco condicional Svelte. O conteúdo dentro deste blobo (o parágrafo de texto) só será renderizado se a condição após 
+            #if (neste caso, a variável visible) for verdadeira.
+        - O parágrafo de texto tem a diretiva transition:typewriter aplicada a ele. 
+            Isso significa que sempre que este parágrafo entra ou sai do DOM (ou seja, sempre que é renderizado ou removido), 
+            ele será animado usando a transição personalizada typewriter.
     
-    5. return `\ transform: scale(${eased}) rotate(${eased * 1080}deg); \ color: hsl( \ ${Math.trunc(t * 360)}, 
-                \ ${Math.min(100, 1000 * (1 - t))}%, \ ${Math.min(50, 500 * (1 - t))}% \ );`;:  (linha 14 a 19);
-        - A função css retorna uma string que contém as regras CSS para animar o elemento. Essas regras CSS são geradas usando interpolação de 
-            string (template literals) para inserir os valores calculados de eased e t nas regras CSS.
-        - A primeira regra CSS especifica a transformação do elemento. O elemento é dimensionado (scale) pelo valor de eased, 
-            o que significa que ele aumentará e diminuirá de tamanho durante a animação. O elemento também é rotacionado (rotate) 
-            pelo valor de eased * 1080, o que significa que ele girará 1080 graus (três voltas completas) durante a animação.
-        - A segunda regra CSS especifica a cor do elemento usando o formato HSL (matiz, saturação, luminosidade). 
-            A matiz (hue) é calculada como o progresso da animação (t) multiplicado por 360, o que significa que a cor mudará suavemente através do 
-            espectro durante a animação. A saturação (saturation) e a luminosidade (lightness) são calculadas usando funções matemáticas para criar
-             um efeito de desvanecimento.
+    A função typewriter neste exemplo anima o texto do elemento letra por letra, como se estivesse sendo digitado por uma máquina de escrever. 
+    Ela faz isso calculando a duração da animação com base no comprimento do texto e na velocidade especificada, 
+      e atualizando o conteúdo do texto do elemento em cada quadro da animação para mostrar apenas as letras que foram “digitadas” 
+      até aquele momento.
+
 -->
