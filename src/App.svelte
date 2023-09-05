@@ -1,38 +1,71 @@
 <script>
-  import { name, greeting } from "./stores";
+//import { writable } from 'svelte/store';
+  import { tweened } from "svelte/motion";
+  import { cubicOut } from "svelte/easing";
+
+//const progress = writable(0);
+
+  const progress = tweened(0, {
+    duration: 400,
+    easing: cubicOut
+  });
 </script>
 
-<h1>{$greeting}</h1><br>
-<input bind:value={$name} />
+<progress value={$progress} />
 
-<button on:click={() => $name += '!'}>
-  Add exclamation mark!
+<button on:click={() => progress.set(0)}>
+  0%
 </button>
+
+<button on:click={() => progress.set(0.25)}>
+  25%
+</button>
+
+<button on:click={() => progress.set(0.50)}>
+  50%
+</button>
+
+<button on:click={() => progress.set(0.75)}>
+  75%
+</button>
+
+<button on:click={() => progress.set(1)}>
+  100%
+</button>
+
+<style>
+  progress {
+    display: block;
+    width: 100%;
+  }
+</style>
 
 <!--
 
-  Se um armazenamento for gravável — ou seja, tiver um método definido — você poderá vincular ao seu valor, 
-  assim como poderá vincular ao estado do componente local.
+  A primeira técnica avançada é o movimento (motions).default
 
-  Também podemos atribuir diretamente para armazenar valores dentro de um componente. (linha 8);
-  A atribuição $name += '!' é equivalente a name.set($name + '!').
+  Definir valores e assistir à atualização do DOM automaticamente é legal. Sabe o que é ainda mais legal? Interpolação desses valores. 
+  O Svelte inclui ferramentas para ajudá-lo a criar interfaces de usuário lisas que usam animação para comunicar alterações.
 
-  CONTEXTUALIZANDO O CÓDIGO:
-    Este código é um exemplo de como usar lojas graváveis e derivadas no Svelte para gerenciar um nome e uma saudação. 
-    O código está dividido em dois arquivos: App.svelte e stores.js.
+  Vamos começar alterando o repositório de progresso (linhas 2 e 6) para um interpolado (linhas 3 e 8 );
 
-    - No arquivo stores.js, são criadas duas lojas: uma loja gravável chamada name que armazena o nome atual e 
-        uma loja derivada chamada greeting que armazena a saudação atual. A loja name é criada usando a função writable do Svelte, 
-        que recebe como argumento o valor inicial da loja. A loja greeting é criada usando a função derived do Svelte, 
-        que recebe como argumentos a loja name e uma função que retorna a saudação baseada no valor atual da loja name.
+  Clicar nos botões faz com que a barra de progresso seja animada para seu novo valor. 
+  É um pouco robótico e insatisfatório embora. Precisamos adicionar uma função de flexibilização. (linhas 4 e 10);
 
-    - No arquivo App.svelte, importamos as lojas name e greeting do arquivo stores.js e usamos seus valores para exibir a saudação atual e 
-        o nome atual no componente. Também adicionamos um campo de entrada ao componente e usamos a sintaxe de vinculação do Svelte 
-        para criar uma conexão bidirecional entre o valor da loja name e o valor do campo de entrada. Isso significa que, 
-        quando o usuário digitar algo no campo de entrada, o valor da loja name será atualizado automaticamente.
-      
-    - Por fim, adicionamos um botão ao componente para adicionar um ponto de exclamação ao valor da loja name. 
-        Quando o botão é clicado, o manipulador de eventos associado ao botão é chamado e o valor da loja name é atualizado adicionando um ponto 
-        de exclamação ao seu final.
+  Obs: O módulo svelte/easing contém as equações de atenuação de Penner, 
+        ou você pode fornecer sua própria função p => t onde p e t são ambos valores entre 0 e 1.
+  
+  O conjunto completo de opções disponíveis para interpolados:
+    - delay — milissegundos antes do início da interpolação.
+    - durartion — A duração da interpolação em milissegundos ou uma função (de, para) => milissegundos que permite 
+        (por exemplo) especificar interpolações mais longas para alterações maiores no valor.
+    - easing — a função p => t.
+    - interpolate — uma função de valor personalizada (de, para) => t => para interpolação entre valores arbitrários. 
+        Por padrão, o Svelte interpolará entre números, datas e matrizes e objetos de forma idêntica 
+          (desde que contenham apenas números e datas ou outras matrizes e objetos válidos). 
+        Se você quiser interpolar (por exemplo) cadeias de cores ou matrizes de transformação, forneça um interpolador personalizado.
+  
+  Você também pode passar essas opções para progress.set e progress.update como um segundo argumento, 
+  caso em que elas substituirão os padrões. Os métodos set e update retornam uma promessa que é resolvida quando a interpolação é concluída.
 
 -->
