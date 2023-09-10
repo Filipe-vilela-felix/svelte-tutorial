@@ -1,68 +1,106 @@
 <script>
-	import { onMount } from 'svelte';
-	import { typewriter } from './transition.js';
-	import { messages } from './loading-messages.js';
+	import { createTodoStore } from './todos.js';
+	import TodoList from './TodoList.svelte';
 
-	let i = -1;
-
-	onMount(() => {
-		const interval = setInterval(() => {
-			i += 1;
-			i %= messages.length;
-		}, 2500);
-
-		return () => {
-			clearInterval(interval);
-		};
-	});
+	const todos = createTodoStore([
+		{ done: false, description: 'write some docs' },
+		{ done: false, description: 'start writing blog post' },
+		{ done: true, description: 'buy some milk' },
+		{ done: false, description: 'mow the lawn' },
+		{ done: false, description: 'feed the turtle' },
+		{ done: false, description: 'fix some bugs' }
+	]);
 </script>
 
-<h1>loading...</h1>
+<div class="board">
+	<input
+		placeholder="what needs to be done?"
+		on:keydown={(e) => {
+			if (e.key === 'Enter') {
+				todos.add(e.currentTarget.value);
+				e.currentTarget.value = '';
+			}
+		}}
+	/>
 
-{#key i}
-	<p in:typewriter={{ speed: 10 }}>
-		{messages[i] || ''}
-	</p>
-{/key}
+	<div class="todo">
+		<h2>todo</h2>
+		<TodoList store={todos} done={false} />
+	</div>
+
+	<div class="done">
+		<h2>done</h2>
+		<TodoList store={todos} done={true} />
+	</div>
+</div>
+
+<style>
+	.board {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		grid-column-gap: 1em;
+		max-width: 36em;
+		margin: 0 auto;
+	}
+
+	.board > input {
+		font-size: 1.4em;
+		grid-column: 1/3;
+		padding: 0.5em;
+		margin: 0 0 1rem 0;
+	}
+
+	h2 {
+		font-size: 2em;
+		font-weight: 200;
+	}
+</style>
 
 <!--
 
-  Os blocos `{#key}{/key}` em Svelte destroem e recriam seu conteúdo quando o valor de uma expressão muda. 
-  Isso é útil quando você deseja que um elemento execute sua transição sempre que um valor mudar, 
-  em vez de apenas quando o elemento entra ou sai do DOM. 
-  Em outras palavras, ele permite que você crie animações para elementos sempre que um valor específico mudar, 
-  mesmo que o elemento já esteja na página.
+  Uma característica particularmente poderosa do motor de transição do Svelte é a capacidade de adiar transições, 
+    para que elas possam ser coordenadas entre vários elementos.
 
-  Aqui, por exemplo, gostaríamos de executar a transição typewriter de transition.js sempre que a mensagem de carregamento, ou seja, i mudar. 
-  Envolva o elemento <p> em um bloco key. (linha 22);
+  Pegue este par de listas de tarefas, em que alternar um todo o envia para a lista oposta. 
+    No mundo real, os objetos não se comportam assim – em vez de desaparecer e reaparecer em outro lugar, 
+    eles se movem por uma série de posições intermediárias. 
+    Usar o movimento pode ajudar muito os usuários a entender o que está acontecendo em seu aplicativo.
+
+  Podemos conseguir esse efeito usando a função crossfade, como visto em transition.js, que cria um par de transições chamadas send e receive. 
+    Quando um elemento é 'enviado', ele procura um elemento correspondente sendo 'recebido', 
+    e gera uma transição que transforma o elemento para a posição de sua contraparte e o desaparece. Quando um elemento é "recebido", 
+    acontece o inverso. Se não houver contrapartida, a transição de fallback será usada.
 
   CONTEXTUALIZANDO O CÓDIGO:
-    O objetivo do código é fornecer uma experiência de carregamento mais interessante e divertida para o usuário, 
-    mostrando mensagens engraçadas enquanto o conteúdo está sendo carregado.
+    Em App.svelte:
+      - Importa-se a função createTodoStore do arquivo todos.js e o componente TodoList do arquivo TodoList.svelte. (linhas 1 a 3);
+      - Cria uma store (uma espécie de armazenamento de dados) para as tarefas usando a função createTodoStore e inicializa-a com algumas 
+          tarefas pré-definidas. (linhas 5 - 12);
+      - Contém o HTML para a estrutura geral da aplicação. Inclui um campo de entrada para adicionar novas tarefas e 
+          duas instâncias do componente TodoList, uma para as tarefas a fazer e outra para as tarefas concluídas. 
+          O campo de entrada tem um evento on:keydown que verifica se a tecla pressionada foi Enter e, se for o caso, 
+          adiciona uma nova tarefa à store usando o método add da store. (linhas 14 a 37);
+      - Contém o CSS para estilizar a aplicação. (linhas 39 a 60);
 
-    - O código começa importando algumas coisas de outros arquivos: onMount do pacote svelte, a função typewriter do arquivo transition.js e 
-        o array messages do arquivo loading-messages.js.
+    Em Todolist.svelte:
+      - Importa as funções send e receive do arquivo transition.js. (linhas 1 a 4);
+      - Define as propriedades store e done que serão recebidas pelo componente. (linhas 6 e 7);
+      - Contém o HTML para exibir a lista de tarefas. Usa a diretiva #each do Svelte para iterar sobre as tarefas na store e 
+          exibir cada uma delas em um elemento li. Cada tarefa contém um checkbox para marcar a tarefa como concluída, 
+          um span com a descrição da tarefa e um botão para removê-la. (linhas 9 a 31);
+        - As diretivas in e out do Svelte são usadas nas linhas 14-15 para animar a entrada e saída das tarefas na lista usando as funções send e receive. (linhas 14 e 15);
+      - Contém o CSS para estilizar a lista de tarefas. (linhas 33 e 34);
 
-    - A variável i é inicializada com o valor -1.
+    todos.js:
+      - Importa a função writable do Svelte. (linha 1);
+      - Define a função createTodoStore, que cria uma store (uma espécie de armazenamento de dados) para as tarefas. 
+          A store é inicializada com algumas tarefas pré-definidas e expõe métodos para adicionar, 
+          remover e marcar tarefas como concluídas. (linhas 3 a 28);
 
-    - A função onMount é chamada quando o componente é montado. Dentro desta função, um intervalo é criado usando setInterval. 
-        A cada 2500 milissegundos (2,5 segundos), a variável i é incrementada em 1 e, em seguida, o módulo do comprimento de messages é aplicado a ela. Isso garante que o valor de i sempre esteja entre 0 e o comprimento de messages menos 1.
-
-    - A função retornada por onMount é chamada quando o componente é desmontado. Ela limpa o intervalo criado anteriormente usando clearInterval.
-
-    - O componente renderiza um título <h1> com o texto “loading…”.
-
-    - Dentro de um bloco {#key i}, um parágrafo <p> é renderizado com a transição typewriter. Isso significa que, sempre que o valor de i mudar, 
-      a transição será acionada. O texto dentro do parágrafo é definido como o elemento atual do array messages, 
-      ou uma string vazia se não houver elemento atual.
-
-    - Em loading-messages.js, um array chamado messages é exportado. 
-        Ele contém várias strings que são mensagens de carregamento engraçadas.
-
-    - Em transition.js, uma função chamada typewriter é exportada. Ela define uma transição personalizada para elementos Svelte. 
-        A transição funciona apenas em elementos com um único nó filho de texto. 
-        Ela pega o texto do nó e define a duração da transição com base no comprimento do texto e na velocidade fornecida. 
-        Durante a transição, a função tick é chamada repetidamente com um valor t entre 0 e 1. 
-        A função usa esse valor para determinar quantos caracteres do texto devem ser exibidos e atualiza o conteúdo do nó de texto.
+    transition.js:
+      - Importa as funções crossfade e quintOut do Svelte. (linhas 1 e 2);
+      - Usa a função crossfade do Svelte para criar duas funções, send e receive, que serão usadas nas diretivas in e out do componente TodoList. 
+          A função crossfade recebe como parâmetro um objeto com algumas opções, 
+          incluindo uma função fallback que define como a animação deve ser executada. (linhas 4 a 20);
 
 -->
