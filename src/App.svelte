@@ -1,105 +1,155 @@
 <script>
-	import { createTodoStore } from './todos.js';
-	import TodoList from './TodoList.svelte';
+	import Canvas from './Canvas.svelte';
+	import { trapFocus } from './actions.js';
 
-	const todos = createTodoStore([
-		{ done: false, description: 'write some docs' },
-		{ done: false, description: 'start writing blog post' },
-		{ done: true, description: 'buy some milk' },
-		{ done: false, description: 'mow the lawn' },
-		{ done: false, description: 'feed the turtle' },
-		{ done: false, description: 'fix some bugs' }
-	]);
+	const colors = ['red', 'orange', 'yellow', 'green', 'blue', 'indigo', 'violet', 'white', 'black'];
+	let selected = colors[0];
+	let size = 10;
+
+	let showMenu = true;
 </script>
 
-<div class="board">
-	<input
-		placeholder="what needs to be done?"
-		on:keydown={(e) => {
-			if (e.key === 'Enter') {
-				todos.add(e.currentTarget.value);
-				e.currentTarget.value = '';
-			}
-		}}
-	/>
+<div class="container">
+	<Canvas color={selected} size={size} />
 
-	<div class="todo">
-		<h2>todo</h2>
-		<TodoList store={todos} done={false} />
-	</div>
+	{#if showMenu}
+		<div
+			class="modal-background"
+			on:click|self={() => showMenu = false}
+			on:keydown={(e) => {
+				if (e.key === 'Escape') showMenu = false;
+			}}
+		>
+			<div class="menu" use:trapFocus>
+				<div class="colors">
+					{#each colors as color}
+						<button
+							class="color"
+							aria-label={color}
+							aria-current={selected === color}
+							style="--color: {color}"
+							on:click={() => {
+								selected = color;
+							}}
+						/>
+					{/each}
+				</div>
 
-	<div class="done">
-		<h2>done</h2>
-		<TodoList store={todos} done={true} />
+				<label>
+					small
+					<input type="range" bind:value={size} min="1" max="50" />
+					large
+				</label>
+			</div>
+		</div>
+	{/if}
+
+	<div class="controls">
+		<button class="show-menu" on:click={() => showMenu = !showMenu}>
+			{showMenu ? 'close' : 'menu'}
+		</button>
 	</div>
 </div>
 
 <style>
-	.board {
+	.container {
+		position: fixed;
+		left: 0;
+		top: 0;
+		width: 100%;
+		height: 100%;
+	}
+
+	.controls {
+		position: absolute;
+		left: 0;
+		top: 0;
+		padding: 1em;
+	}
+
+	.show-menu {
+		width: 5em;
+	}
+
+	.modal-background {
+		position: fixed;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		left: 0;
+		top: 0;
+		width: 100%;
+		height: 100%;
+		backdrop-filter: blur(20px);
+	}
+
+	.menu {
+		position: relative;
+		background: var(--bg-2);
+		width: calc(100% - 2em);
+		max-width: 28em;
+		padding: 1em 1em 0.5em 1em;
+		border-radius: 1em;
+		box-sizing: border-box;
+		user-select: none;
+	}
+
+	.colors {
 		display: grid;
-		grid-template-columns: 1fr 1fr;
-		grid-column-gap: 1em;
-		max-width: 36em;
-		margin: 0 auto;
+		align-items: center;
+		grid-template-columns: repeat(9, 1fr);
+		grid-gap: 0.5em;
 	}
 
-	.board > input {
-		font-size: 1.4em;
-		grid-column: 1/3;
-		padding: 0.5em;
-		margin: 0 0 1rem 0;
+	.color {
+		aspect-ratio: 1;
+		border-radius: 50%;
+		background: var(--color, #fff);
+		transform: none;
+		filter: drop-shadow(2px 2px 3px rgba(0,0,0,0.2));
+		transition: all 0.1s;
 	}
 
-	h2 {
-		font-size: 2em;
-		font-weight: 200;
+	.color[aria-current="true"] {
+		transform: translate(1px, 1px);
+		filter: none;
+		box-shadow: inset 3px 3px 4px rgba(0,0,0,0.2);
+	}
+
+	.menu label {
+		display: flex;
+		width: 100%;
+		margin: 1em 0 0 0;
+	}
+
+	.menu input {
+		flex: 1;
 	}
 </style>
 
 <!--
 
-  No capítulo anterior, usamos transições adiadas para criar a ilusão de movimento à medida que os elementos se movem de uma lista para a outra.
+	As ações são essencialmente funções de ciclo de vida em nível de elemento. Eles são úteis para coisas como:
+		- Interface com bibliotecas de terceiros
+		- Imagens carregadas com preguiça
+		- Dicas de ferramentas
+		- Adicionando manipuladores de eventos personalizados
 
-  Para completar a ilusão, também precisamos aplicar movimento aos elementos que não estão em transição. Para isso, utilizamos a diretiva animate.
 
-  Primeiro, importe a função flip — flip significa 'Primeiro, Último, Inverter, Reproduzir' — de svelte/animate para TodoList.svelte. (linha 1 em TodoList.svelte);
+	Neste app, vc pode rabiscar no <canvas> alterar as cores e o tamanho do pincel através do menu. 
+	Mas se você abrir o menu e percorrer as opções com a tecla Tab, logo descobrirá que o foco não está preso dentro do modal.
 
-  Em seguida, adicionamo-os aos <li> elementos e tb um parâmetro de duração. (linhas 15 em TodoList.svelte);
+	Podemos corrigir isso com uma ação. Importar trapFocus de ações.js... (linha 3 em App.svelte);
 
-  Obs: Observe que todas as transições e animações estão sendo aplicadas com CSS, em vez de JavaScript, o que significa que elas não bloquearão 
-        (ou serão bloqueadas por) o thread principal.
+	... Em seguida, adicione-o ao menu com a diretiva Use.(linha 23);
 
-  CONTEXTUALIZANDO O CÓDIGO:
-    Em App.svelte:
-      - Importa-se a função createTodoStore do arquivo todos.js e o componente TodoList do arquivo TodoList.svelte. (linhas 1 a 3);
-      - Cria uma store (uma espécie de armazenamento de dados) para as tarefas usando a função createTodoStore e inicializa-a com algumas 
-          tarefas pré-definidas. (linhas 5 - 12);
-      - Contém o HTML para a estrutura geral da aplicação. Inclui um campo de entrada para adicionar novas tarefas e 
-          duas instâncias do componente TodoList, uma para as tarefas a fazer e outra para as tarefas concluídas. 
-          O campo de entrada tem um evento on:keydown que verifica se a tecla pressionada foi Enter e, se for o caso, 
-          adiciona uma nova tarefa à store usando o método add da store. (linhas 14 a 37);
-      - Contém o CSS para estilizar a aplicação. (linhas 39 a 60);
+	Vamos dar uma olhada na função trapFocus em actions.js. Uma função de ação é chamada com um nó — o <div class="menu"> no nosso caso — 
+	quando o nó é montado no DOM, e pode retornar um objeto de ação com um método de destruição.
 
-    Em Todolist.svelte:
-      - Importa a função flip. (linha 2);
-      - Importa as funções send e receive do arquivo transition.js. (linhas 3);
-      - Define as propriedades store e done que serão recebidas pelo componente. (linhas 6 e 7);
-      - Contém o HTML para exibir a lista de tarefas. Usa a diretiva #each do Svelte para iterar sobre as tarefas na store e 
-          exibir cada uma delas em um elemento li. Cada tarefa contém um checkbox para marcar a tarefa como concluída, 
-          um span com a descrição da tarefa e um botão para removê-la. (linhas 9 a 31);
-        - As diretivas in e out do Svelte são usadas nas linhas 14-15 para animar a entrada e saída das tarefas na lista usando as funções send e receive. (linhas 14 e 15);
-      - Contém o CSS para estilizar a lista de tarefas. (linhas 33 e 34);
+	Primeiro, precisamos adicionar um ouvinte de eventos que intercepte pressionamentos de tecla Tab. (linha 30 em actions.js);
 
-    todos.js:
-      - Importa a função writable do Svelte. (linha 1);
-      - Define a função createTodoStore, que cria uma store (uma espécie de armazenamento de dados) para as tarefas. 
-          A store é inicializada com algumas tarefas pré-definidas e expõe métodos para adicionar, 
-          remover e marcar tarefas como concluídas. (linhas 3 a 28);
+	Em segundo lugar, precisamos fazer alguma limpeza quando o nó é desmontado — removendo o ouvinte de eventos e restaurando o 
+	foco para onde estava antes do elemento montado. (linhas 32 a 38 em action.js);
 
-    transition.js:
-      - Importa as funções crossfade e quintOut do Svelte. (linhas 1 e 2);
-      - Usa a função crossfade do Svelte para criar duas funções, send e receive, que serão usadas nas diretivas in e out do componente TodoList. 
-          A função crossfade recebe como parâmetro um objeto com algumas opções, 
-          incluindo uma função fallback que define como a animação deve ser executada. (linhas 4 a 20);
-
+	
 -->
