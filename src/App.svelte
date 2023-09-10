@@ -58,18 +58,16 @@
 
 <!--
 
-  Uma característica particularmente poderosa do motor de transição do Svelte é a capacidade de adiar transições, 
-    para que elas possam ser coordenadas entre vários elementos.
+  No capítulo anterior, usamos transições adiadas para criar a ilusão de movimento à medida que os elementos se movem de uma lista para a outra.
 
-  Pegue este par de listas de tarefas, em que alternar um todo o envia para a lista oposta. 
-    No mundo real, os objetos não se comportam assim – em vez de desaparecer e reaparecer em outro lugar, 
-    eles se movem por uma série de posições intermediárias. 
-    Usar o movimento pode ajudar muito os usuários a entender o que está acontecendo em seu aplicativo.
+  Para completar a ilusão, também precisamos aplicar movimento aos elementos que não estão em transição. Para isso, utilizamos a diretiva animate.
 
-  Podemos conseguir esse efeito usando a função crossfade, como visto em transition.js, que cria um par de transições chamadas send e receive. 
-    Quando um elemento é 'enviado', ele procura um elemento correspondente sendo 'recebido', 
-    e gera uma transição que transforma o elemento para a posição de sua contraparte e o desaparece. Quando um elemento é "recebido", 
-    acontece o inverso. Se não houver contrapartida, a transição de fallback será usada.
+  Primeiro, importe a função flip — flip significa 'Primeiro, Último, Inverter, Reproduzir' — de svelte/animate para TodoList.svelte. (linha 1 em TodoList.svelte);
+
+  Em seguida, adicionamo-os aos <li> elementos e tb um parâmetro de duração. (linhas 15 em TodoList.svelte);
+
+  Obs: Observe que todas as transições e animações estão sendo aplicadas com CSS, em vez de JavaScript, o que significa que elas não bloquearão 
+        (ou serão bloqueadas por) o thread principal.
 
   CONTEXTUALIZANDO O CÓDIGO:
     Em App.svelte:
@@ -83,7 +81,8 @@
       - Contém o CSS para estilizar a aplicação. (linhas 39 a 60);
 
     Em Todolist.svelte:
-      - Importa as funções send e receive do arquivo transition.js. (linhas 1 a 4);
+      - Importa a função flip. (linha 2);
+      - Importa as funções send e receive do arquivo transition.js. (linhas 3);
       - Define as propriedades store e done que serão recebidas pelo componente. (linhas 6 e 7);
       - Contém o HTML para exibir a lista de tarefas. Usa a diretiva #each do Svelte para iterar sobre as tarefas na store e 
           exibir cada uma delas em um elemento li. Cada tarefa contém um checkbox para marcar a tarefa como concluída, 
